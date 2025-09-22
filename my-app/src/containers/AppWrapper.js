@@ -1,5 +1,5 @@
-import './style/App.css';
-import App from './App';
+import '../style/index.css';
+import App from '../App.js';
 
 function AppWrapper() {
   return (
