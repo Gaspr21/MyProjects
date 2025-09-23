@@ -51,74 +51,6 @@ func buildMaze(width, height int) [][]Cell {
 	return maze
 }
 
-// ---------- Maze solving ----------
-func solveMaze(maze [][]Cell, conn *websocket.Conn) {
-	type Pos struct{ X, Y int }
-	visited := make([][]bool, len(maze))
-	for i := range visited {
-		visited[i] = make([]bool, len(maze[0]))
-	}
-
-	queue := []Pos{{1, 1}}
-	prev := make(map[Pos]Pos)
-	visited[1][1] = true
-
-	dirs := []Pos{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
-	end := Pos{X: len(maze[0]) - 2, Y: len(maze) - 2}
-
-	for len(queue) > 0 {
-		current := queue[0]
-		queue = queue[1:]
-
-		// Send visited step
-		step := map[string]interface{}{
-			"x":     current.X,
-			"y":     current.Y,
-			"state": "visited",
-		}
-		data, _ := json.Marshal(step)
-		conn.WriteMessage(websocket.TextMessage, data)
-		time.Sleep(30 * time.Millisecond)
-
-		if current == end {
-			break
-		}
-
-		for _, d := range dirs {
-			nx, ny := current.X+d.X, current.Y+d.Y
-			if nx > 0 && nx < len(maze[0])-1 && ny > 0 && ny < len(maze)-1 &&
-				maze[ny][nx].State == "path" && !visited[ny][nx] {
-				visited[ny][nx] = true
-				queue = append(queue, Pos{nx, ny})
-				prev[Pos{nx, ny}] = current
-			}
-		}
-	}
-
-	// Reconstruct solution path
-	pathPos := end
-	for {
-		step := map[string]interface{}{
-			"x":     pathPos.X,
-			"y":     pathPos.Y,
-			"state": "solution",
-		}
-		data, _ := json.Marshal(step)
-		conn.WriteMessage(websocket.TextMessage, data)
-		time.Sleep(30 * time.Millisecond)
-
-		if pathPos == (Pos{1, 1}) {
-			break
-		}
-		pathPos = prev[pathPos]
-	}
-
-	// Send "done" message
-	doneMsg := map[string]string{"status": "done"}
-	data, _ := json.Marshal(doneMsg)
-	conn.WriteMessage(websocket.TextMessage, data)
-}
-
 // ---------- WebSocket handler ----------
 func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -133,18 +65,24 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			break
 		}
-		if string(msg) == "start" {
+
+		if string(msg) == "start_bfs" {
 			if currentMaze == nil {
-				currentMaze = buildMaze(21, 21)
+				currentMaze = buildMaze(51, 51)
 			}
-			go solveMaze(currentMaze, conn)
+			go SolveMazeBFS(currentMaze, conn)
+		} else if string(msg) == "start_dfs" {
+			if currentMaze == nil {
+				currentMaze = buildMaze(51, 51)
+			}
+			go SolveMazeDFS(currentMaze, conn)
 		}
 	}
 }
 
 // ---------- HTTP handler ----------
 func generateMaze(w http.ResponseWriter, r *http.Request) {
-	currentMaze = buildMaze(21, 21)
+	currentMaze = buildMaze(51, 51)
 	json.NewEncoder(w).Encode(currentMaze)
 }
 

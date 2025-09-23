@@ -61,11 +61,17 @@ function Maze() {
     }
   }, []);
 
-  const startSolving = () => {
+  const startSolving = (algorithm) => {
     if (!cells.length) return;
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send("start");
-      console.log("Start message sent");
+      if(algorithm == "bfs"){
+        wsRef.current.send("start_bfs");
+        console.log("Start_bfs message sent");
+      }
+      if(algorithm == "dfs"){
+        wsRef.current.send("start_dfs");
+        console.log("Start_dfs message sent");
+      }
     } else {
       console.log("WebSocket not open yet");
     }
@@ -75,7 +81,9 @@ function Maze() {
     <div style={{ padding: "20px" }}>
       <div style={{ marginBottom: "10px" }}>
         <button onClick={fetchMaze} style={{ marginRight: "10px" }}>New Maze</button>
-        <button onClick={startSolving}>Start Solving</button>
+        <p>Solve using selected agorithm. </p>
+        <button onClick={()=>{startSolving("bfs")}}>BFS</button>
+        <button onClick={()=>{startSolving("dfs")}}>DFS</button>
       </div>
 
       {solved && (
@@ -87,8 +95,8 @@ function Maze() {
       <div
         style={{
           display: "grid",
-          gridTemplateRows: `repeat(${cells.length}, 20px)`,
-          gridTemplateColumns: `repeat(${cells[0]?.length || 0}, 20px)`,
+          gridTemplateRows: `repeat(${cells.length}, 10px)`,
+          gridTemplateColumns: `repeat(${cells[0]?.length || 0}, 10px)`,
           gap: "1px"
         }}
       >
@@ -96,8 +104,8 @@ function Maze() {
           <div
             key={`${c.x}-${c.y}`}
             style={{
-              width: "20px",
-              height: "20px",
+              width: "10px",
+              height: "10px",
               backgroundColor:
                 c.state === "wall"
                   ? "black"
