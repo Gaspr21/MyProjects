@@ -64,13 +64,17 @@ function Maze() {
   const startSolving = (algorithm) => {
     if (!cells.length) return;
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      if(algorithm == "bfs"){
+      if(algorithm === "bfs"){
         wsRef.current.send("start_bfs");
         console.log("Start_bfs message sent");
       }
-      if(algorithm == "dfs"){
+      if(algorithm === "dfs"){
         wsRef.current.send("start_dfs");
         console.log("Start_dfs message sent");
+      }
+      if(algorithm === "lhw"){
+        wsRef.current.send("start_lhw");
+        console.log("Start_lhw message sent");
       }
     } else {
       console.log("WebSocket not open yet");
@@ -84,6 +88,7 @@ function Maze() {
         <p>Solve using selected agorithm. </p>
         <button onClick={()=>{startSolving("bfs")}}>BFS</button>
         <button onClick={()=>{startSolving("dfs")}}>DFS</button>
+        <button onClick={()=>{startSolving("lhw")}}>LHW</button>
       </div>
 
       {solved && (

@@ -76,6 +76,11 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 				currentMaze = buildMaze(51, 51)
 			}
 			go SolveMazeDFS(currentMaze, conn)
+		} else if string(msg) == "start_lhw" {
+			if currentMaze == nil {
+				currentMaze = buildMaze(51, 51)
+			}
+			go SolveMazeWallFollower(currentMaze, conn)
 		}
 	}
 }

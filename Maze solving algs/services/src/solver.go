@@ -113,3 +113,49 @@ func SolveMazeDFS(maze [][]Cell, conn *websocket.Conn) {
 
 	reconstructPath(conn, end, prev)
 }
+
+// ---------- Hand-on-wall rule (Left-hand) ----------
+func SolveMazeWallFollower(maze [][]Cell, conn *websocket.Conn) {
+	// Directions: N, E, S, W
+	dirs := []Pos{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
+	dir := 1 // start facing East (right)
+
+	start := Pos{1, 1}
+	end := Pos{X: len(maze[0]) - 2, Y: len(maze) - 2}
+
+	current := start
+	prev := make(map[Pos]Pos)
+	visited := make(map[Pos]bool)
+
+	for {
+		sendStep(conn, current.X, current.Y, "visited")
+		visited[current] = true
+
+		if current == end {
+			break
+		}
+
+		// Try left, straight, right, then back
+		turned := false
+		for i := -1; i <= 2; i++ {
+			ndir := (dir + i + 4) % 4
+			nx, ny := current.X+dirs[ndir].X, current.Y+dirs[ndir].Y
+			if nx > 0 && nx < len(maze[0])-1 && ny > 0 && ny < len(maze)-1 &&
+				maze[ny][nx].State == "path" {
+				prev[Pos{nx, ny}] = current
+				current = Pos{nx, ny}
+				dir = ndir
+				turned = true
+				break
+			}
+		}
+		if !turned {
+			// safety break (shouldn’t happen in perfect mazes)
+			break
+		}
+		time.Sleep(30 * time.Millisecond)
+	}
+
+	// Reconstruct solution path
+	reconstructPath(conn, end, prev)
+}
