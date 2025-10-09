@@ -13,3 +13,5 @@ Always run backend first so that the socket connection is established correctly.
 ` npm start `
 
 Thats it.
+
+P.S.: The project has not yet been completed. Work in progress.
