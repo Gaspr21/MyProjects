@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import MazeSolution from "./Maze_Solution";
 
 function updateCells(prev, step) {
   if (!prev.length) return prev;
@@ -64,6 +65,9 @@ function Maze() {
   const startSolving = (algorithm) => {
     if (!cells.length) return;
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      // clear the maze if it has a solution displayed
+
+
       if(algorithm === "bfs"){
         wsRef.current.send("start_bfs");
         console.log("Start_bfs message sent");
@@ -105,24 +109,7 @@ function Maze() {
           gap: "1px"
         }}
       >
-        {cells.flat().map(c => (
-          <div
-            key={`${c.x}-${c.y}`}
-            style={{
-              width: "10px",
-              height: "10px",
-              backgroundColor:
-                c.state === "wall"
-                  ? "black"
-                  : c.state === "visited"
-                    ? "lightblue"
-                    : c.state === "solution"
-                      ? "green"
-                      : "white",
-              border: "1px solid #ccc"
-            }}
-          />
-        ))}
+          <MazeSolution cells = {cells} />
       </div>
     </div>
   );

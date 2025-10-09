@@ -150,7 +150,6 @@ func SolveMazeWallFollower(maze [][]Cell, conn *websocket.Conn) {
 			}
 		}
 		if !turned {
-			// safety break (shouldn’t happen in perfect mazes)
 			break
 		}
 		time.Sleep(30 * time.Millisecond)

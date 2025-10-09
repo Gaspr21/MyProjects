@@ -54,6 +54,8 @@ func buildMaze(width, height int) [][]Cell {
 // ---------- WebSocket handler ----------
 func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
+	maze_width := 51
+	maze_height := 51
 	if err != nil {
 		fmt.Println("WebSocket upgrade error:", err)
 		return
@@ -68,17 +70,17 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 
 		if string(msg) == "start_bfs" {
 			if currentMaze == nil {
-				currentMaze = buildMaze(51, 51)
+				currentMaze = buildMaze(maze_width, maze_height)
 			}
 			go SolveMazeBFS(currentMaze, conn)
 		} else if string(msg) == "start_dfs" {
 			if currentMaze == nil {
-				currentMaze = buildMaze(51, 51)
+				currentMaze = buildMaze(maze_width, maze_height)
 			}
 			go SolveMazeDFS(currentMaze, conn)
 		} else if string(msg) == "start_lhw" {
 			if currentMaze == nil {
-				currentMaze = buildMaze(51, 51)
+				currentMaze = buildMaze(maze_width, maze_height)
 			}
 			go SolveMazeWallFollower(currentMaze, conn)
 		}
