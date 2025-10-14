@@ -1,10 +1,10 @@
 import '../style/index.css';
-import App from '../App.js';
+import App from './App.js';
 
 function AppWrapper() {
   return (
     <div className="App-Wrapper">
-      <App/>
+        <App />
     </div>
   );
 }

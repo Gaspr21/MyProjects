@@ -1,31 +1,39 @@
 import { useState, useEffect, useRef } from "react";
-import MazeSolution from "./Maze_Solution";
+import MazeSolution from "./Maze_Solution.tsx";
 
-function updateCells(prev, step) {
+function updateCells(prev: Cell[][], step: any) {
   if (!prev.length) return prev;
 
   const { x, y, state } = step;
   if (x === undefined || y === undefined) return prev;
 
-  // deep copy grid to trigger React re-render
   const newGrid = prev.map(row => row.map(cell => ({ ...cell })));
   newGrid[y][x].state = state;
   return newGrid;
 }
 
+
 function Maze() {
-  const [cells, setCells] = useState([]);
+  const [cells, setCells] = useState<Cell[][]>([]);
   const [solved, setSolved] = useState(false);
-  const wsRef = useRef(null);
+
+  const wsRef = useRef<WebSocket | null>(null);
+  const originalMazeRef = useRef<Cell[][]>([]);
+
+
 
   const fetchMaze = () => {
     fetch("/maze")
       .then(res => res.json())
       .then(data => {
-        const mazeWithCoords = data.map((row, y) =>
+        const mazeWithCoords = data.map((row: any[], y: number) =>
           row.map((cell, x) => ({ ...cell, x, y }))
         );
+
         setCells(mazeWithCoords);
+        originalMazeRef.current = mazeWithCoords.map((row: Cell[]) =>
+          row.map(cell => ({ ...cell }))
+        );
         setSolved(false);
       });
   };
@@ -40,6 +48,7 @@ function Maze() {
 
       ws.onmessage = (e) => {
         const step = JSON.parse(e.data);
+        console.log(step)
 
         if (step.status === "done") {
           setSolved(true);
@@ -62,21 +71,31 @@ function Maze() {
     }
   }, []);
 
-  const startSolving = (algorithm) => {
+  
+    const clearMaze = () => {
+      if (!originalMazeRef.current.length) return;
+
+      const restored = originalMazeRef.current.map((row: Cell[]) =>
+        row.map(cell => ({ ...cell }))
+      );
+      setCells(restored);
+      setSolved(false);
+    };
+
+
+  const startSolving = (algorithm: String) => {
     if (!cells.length) return;
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      // clear the maze if it has a solution displayed
 
-
-      if(algorithm === "bfs"){
+      if (algorithm === "bfs") {
         wsRef.current.send("start_bfs");
         console.log("Start_bfs message sent");
       }
-      if(algorithm === "dfs"){
+      if (algorithm === "dfs") {
         wsRef.current.send("start_dfs");
         console.log("Start_dfs message sent");
       }
-      if(algorithm === "lhw"){
+      if (algorithm === "lhw") {
         wsRef.current.send("start_lhw");
         console.log("Start_lhw message sent");
       }
@@ -89,15 +108,16 @@ function Maze() {
     <div style={{ padding: "20px" }}>
       <div style={{ marginBottom: "10px" }}>
         <button onClick={fetchMaze} style={{ marginRight: "10px" }}>New Maze</button>
+        <button onClick={clearMaze} style={{ marginRight: "10px" }}>Clear Maze</button>
         <p>Solve using selected agorithm. </p>
-        <button onClick={()=>{startSolving("bfs")}}>BFS</button>
-        <button onClick={()=>{startSolving("dfs")}}>DFS</button>
-        <button onClick={()=>{startSolving("lhw")}}>LHW</button>
+        <button onClick={() => { startSolving("bfs") }}>BFS</button>
+        <button onClick={() => { startSolving("dfs") }}>DFS</button>
+        <button onClick={() => { startSolving("lhw") }}>LHW</button>
       </div>
 
       {solved && (
         <div style={{ marginBottom: "10px", color: "green", fontWeight: "bold" }}>
-          Maze Solved 🎉
+          Maze Solved !!
         </div>
       )}
 
@@ -109,7 +129,7 @@ function Maze() {
           gap: "1px"
         }}
       >
-          <MazeSolution cells = {cells} />
+        <MazeSolution cells={cells} />
       </div>
     </div>
   );

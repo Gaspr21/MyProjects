@@ -1,0 +1,8 @@
+.errorPrompt{
+    border: white solid 3px;
+    border-color: aliceblue;
+    border-radius: 25px ;
+    background-color: red;
+    height: 100px;
+    width: 100px;
+}

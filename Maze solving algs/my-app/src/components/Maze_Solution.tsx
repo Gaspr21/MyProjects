@@ -1,32 +1,36 @@
 import React from "react";
 
-function MazeSolution({ cells }) {
-
+function MazeSolution({ cells } : { cells: Cell[][] }) {
+  // if(!cells[0]){
+  //   throw new Error("This is breaking")
+  //   return
+  // }
 
   return (
     <>
-      {cells.flat().map(c => (
+    {console.log("these are the properties of the state",cells)}
+      {cells.flat().map(cell => (
         <div
-          key={`${c.x}-${c.y}`}
+          key={`${cell.x}-${cell.y}`}
           style={{
             width: "10px",
             height: "10px",
             backgroundColor:
-              c.state === "wall"
+              cell.state === "wall"
                 ? "black"
-                : c.state === "visited"
+                : cell.state === "visited"
                   ? "lightblue"
-                  : c.state === "solution"
+                  : cell.state === "solution"
                     ? "#299900ff"
                     : "#636363ff",
             border:
-              c.state === "visited"
+              cell.state === "visited"
                 ? "lightblue"
-                : c.state === "solution"
+                : cell.state === "solution"
                   ? "#299900ff"
                   : "#636363ff",
             borderRadius:
-              c.state === "solution"
+              cell.state === "solution"
                 ? "15px"
                 : "0px",
           }}
