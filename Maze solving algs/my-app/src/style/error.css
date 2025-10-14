@@ -1,8 +1,16 @@
-.errorPrompt{
-    border: white solid 3px;
+.errorPrompt {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: white solid 1px;
     border-color: aliceblue;
-    border-radius: 25px ;
-    background-color: red;
-    height: 100px;
-    width: 100px;
+    border-radius: 25px;
+    background-color: rgb(100, 0, 0);
+    height: 150px;
+    max-width: 300px;
+    box-shadow: 2px 3px rgba(242, 242, 242, 0.2) ;
+}
+
+.errorMessage {
+    margin: 20px;
 }

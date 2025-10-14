@@ -7,7 +7,7 @@ function ErrorPrompt({message} : {message : any}) {
         <>
         {console.log(message)}
         <div className="errorPrompt">
-            !!! WRONG !!!
+            <div className="errorMessage">!!! Something went wrong !!!</div>
         </div>
         </>
     )

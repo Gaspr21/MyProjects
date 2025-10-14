@@ -32,6 +32,10 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     console.error("Error message:", error.message);
     console.error("Stack trace:", error.stack);
     console.error("Component stack:", info.componentStack);
+
+    if (this.props.navigate) {
+      this.props.navigate("/error");
+    }
   }
 
   render() {
@@ -40,7 +44,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       return <ErrorPrompt message={this.props.message ?? "Something went wrong."} />;
     }
 
-    return;
+    return this.props.children;
   }
 }
 

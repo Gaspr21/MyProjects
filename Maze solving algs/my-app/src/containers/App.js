@@ -1,18 +1,15 @@
 import React from "react";
 import AppRoutes from "../Routing/AppRoutes.js";
-import Maze from "../components/Maze.tsx";
+import {BrowserRouter as Router} from "react-router-dom";
 import '../style/App.css'
-import { BrowserRouter as Router } from "react-router-dom";
-
 
 function App() {
 
     return (
         <div className="App">
-            {/* <Router>
+            <Router>
                 <AppRoutes />
-            </Router> */}
-            <Maze/>
+            </Router>
         </div>
     )
 }
