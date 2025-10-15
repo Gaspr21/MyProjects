@@ -12,6 +12,11 @@ function updateCells(prev: Cell[][], step: any) {
   return newGrid;
 }
 
+declare var process: {
+  env: {
+    REACT_APP_API_URL: string;
+  };
+};
 
 function Maze() {
   const [cells, setCells] = useState<Cell[][]>([]);
@@ -20,41 +25,47 @@ function Maze() {
   const wsRef = useRef<WebSocket | null>(null);
   const originalMazeRef = useRef<Cell[][]>([]);
 
+  const apiUrl ="http://localhost:8080";
+//  process.env.REACT_APP_API_URL || 
 
+  const fetchMaze = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/maze`)
+      const data = await res.json()
 
-  const fetchMaze = () => {
-    fetch("/maze")
-      .then(res => res.json())
-      .then(data => {
-        const mazeWithCoords = data.map((row: any[], y: number) =>
-          row.map((cell, x) => ({ ...cell, x, y }))
-        );
+      const mazeWithCoords = data.map((row: any[], y: number) =>
+        row.map((cell, x) => ({ ...cell, x, y }))
+      );
 
-        setCells(mazeWithCoords);
-        originalMazeRef.current = mazeWithCoords.map((row: Cell[]) =>
-          row.map(cell => ({ ...cell }))
-        );
-        setSolved(false);
-      });
+      setCells(mazeWithCoords);
+      originalMazeRef.current = mazeWithCoords.map((row: Cell[]) =>
+        row.map(cell => ({ ...cell }))
+      );
+      setSolved(false);
+    } catch (err) {
+      console.error('Failed to fetch maze:', err)
+    }
   };
 
   useEffect(() => {
+    if (!apiUrl) {
+      console.error("REACT_APP_API_URL is not defined!");
+    }
     fetchMaze();
 
     if (!wsRef.current) {
-      const ws = new WebSocket("ws://localhost:8080/solve");
+      // Use Docker Compose service name for WebSocket
+      const ws = new WebSocket(`ws://${apiUrl}/solve`);
+      // const ws = new WebSocket(`ws://${apiUrl.replace(/^http/, "ws")}/solve`);
 
       ws.onopen = () => console.log("WebSocket connected");
 
       ws.onmessage = (e) => {
         const step = JSON.parse(e.data);
-        console.log(step)
-
         if (step.status === "done") {
           setSolved(true);
           return;
         }
-
         setCells(prev => updateCells(prev, step));
       };
 
@@ -62,25 +73,23 @@ function Maze() {
 
       ws.onclose = () => {
         console.log("WebSocket closed, will reconnect in 1s");
-        setTimeout(() => {
-          wsRef.current = null;
-        }, 1000);
+        setTimeout(() => { wsRef.current = null; }, 1000);
       };
 
       wsRef.current = ws;
     }
   }, []);
 
-  
-    const clearMaze = () => {
-      if (!originalMazeRef.current.length) return;
 
-      const restored = originalMazeRef.current.map((row: Cell[]) =>
-        row.map(cell => ({ ...cell }))
-      );
-      setCells(restored);
-      setSolved(false);
-    };
+  const clearMaze = () => {
+    if (!originalMazeRef.current.length) return;
+
+    const restored = originalMazeRef.current.map((row: Cell[]) =>
+      row.map(cell => ({ ...cell }))
+    );
+    setCells(restored);
+    setSolved(false);
+  };
 
 
   const startSolving = (algorithm: String) => {

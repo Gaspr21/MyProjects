@@ -16,7 +16,7 @@ type Cell struct {
 }
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
+	CheckOrigin: func(r *http.Request) bool { return true }, // allow all origins for dev
 }
 
 var currentMaze [][]Cell
@@ -49,6 +49,30 @@ func buildMaze(width, height int) [][]Cell {
 	maze[1][1].State = "path"
 	carve(1, 1)
 	return maze
+}
+
+// ---------- HTTP CORS wrapper ----------
+func withCORS(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Allow React dev server origin
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		// Handle preflight OPTIONS request
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		handler(w, r)
+	}
+}
+
+// ---------- HTTP handler ----------
+func generateMaze(w http.ResponseWriter, r *http.Request) {
+	currentMaze = buildMaze(51, 51)
+	json.NewEncoder(w).Encode(currentMaze)
 }
 
 // ---------- WebSocket handler ----------
@@ -87,16 +111,10 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ---------- HTTP handler ----------
-func generateMaze(w http.ResponseWriter, r *http.Request) {
-	currentMaze = buildMaze(51, 51)
-	json.NewEncoder(w).Encode(currentMaze)
-}
-
 // ---------- Main ----------
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	http.HandleFunc("/maze", generateMaze)
+	http.HandleFunc("/maze", withCORS(generateMaze))
 	http.HandleFunc("/solve", websocketHandler)
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", nil)
