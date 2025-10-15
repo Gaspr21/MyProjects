@@ -16,4 +16,6 @@ Always run backend first so that the socket connection is established correctly.
 
 Thats it.
 
+To containerize react app and go server read [README](my-app/README.Docker.md)
+
 P.S.: The project has not yet been completed. Work in progress.
