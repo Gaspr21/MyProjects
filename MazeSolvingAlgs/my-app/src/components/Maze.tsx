@@ -26,7 +26,7 @@ function Maze() {
   const originalMazeRef = useRef<Cell[][]>([]);
 
   const apiUrl ="http://localhost:8080";
-//  process.env.REACT_APP_API_URL || 
+//  process.env.REACT_APP_API_URL || "http://localhost:8080"
 
   const fetchMaze = async () => {
     try {
@@ -54,9 +54,7 @@ function Maze() {
     fetchMaze();
 
     if (!wsRef.current) {
-      // Use Docker Compose service name for WebSocket
-      const ws = new WebSocket(`ws://${apiUrl}/solve`);
-      // const ws = new WebSocket(`ws://${apiUrl.replace(/^http/, "ws")}/solve`);
+      const ws = new WebSocket(`ws://${apiUrl.replace("http://", "")}/solve`);
 
       ws.onopen = () => console.log("WebSocket connected");
 

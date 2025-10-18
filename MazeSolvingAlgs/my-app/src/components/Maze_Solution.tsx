@@ -8,7 +8,6 @@ function MazeSolution({ cells } : { cells: Cell[][] }) {
 
   return (
     <>
-    {console.log("these are the properties of the state",cells)}
       {cells.flat().map(cell => (
         <div
           key={`${cell.x}-${cell.y}`}

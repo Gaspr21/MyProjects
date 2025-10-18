@@ -71,6 +71,7 @@ func withCORS(handler http.HandlerFunc) http.HandlerFunc {
 
 // ---------- HTTP handler ----------
 func generateMaze(w http.ResponseWriter, r *http.Request) {
+	// fmt.Println(w, r)
 	currentMaze = buildMaze(51, 51)
 	json.NewEncoder(w).Encode(currentMaze)
 }

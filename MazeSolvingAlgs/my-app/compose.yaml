@@ -13,10 +13,12 @@ services:
   go-server:
     build:
       context: ../services
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: go-server
     ports:
       - "8080:8080"
+    volumes:
+      - ../services:/src
     networks:
       - app-network
 
@@ -28,7 +30,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://go-server:8080
+      - REACT_APP_API_URL=http://localhost:8080
     volumes:
       - ../my-app:/usr/src/app
       - /usr/src/app/node_modules
